@@ -1,27 +1,33 @@
-const express = require('express')
+const express = require('express');
+const connectDB = require('./config/database'); // Importing database connection
+const app = express(); // Initializing Express app
+const User = require("./models/user")
 
-const app = express()
+app.use(express.json());
 
-//This will only handle the GET call to /user
-app.get("/user" , (req,res)=>{
-    res.send({firstName: "Akshay" , lastName:"Saini"})
+app.post("/signup",async (req,res)=>{
+   
+    const user = new User(req.body);
+    try{
+        await user.save();
+        res.send("User added successfully");
+    }catch(err){
+        res.status(400).send("Error saving the user:" + err.message);
+    }
+    
 });
 
-app.post("/user",(req,res)=>{
-    console.log("Save data to the database ");
-    res.send("Data successfully saved to the database");
-});
-app.delete("/user",(req,res)=>{
-  
-    res.send("Deleted Successfully");
-});
-
-//this will match all the HTTP method API Calls to /test
-app.use("/test",(req,res)=>{
-    res.send("Hello Hello Hello !")
-});
-
-
-app.listen(3000,() =>{
-    console.log("Server is successfully listening on Port 3000")
-});
+// Establishing the database connection
+connectDB()
+    .then(() => {
+        console.log('Database Connection established...');
+        
+        // Starting the Express server only after DB connection is successful
+        app.listen(7777, () => {
+            console.log('Server is successfully listening on Port 7777');
+        });
+    })
+    .catch((err) => {
+        console.error('Database cannot be established:');
+        
+    });
